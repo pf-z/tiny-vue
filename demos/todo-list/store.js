@@ -1,4 +1,4 @@
-import { reactive, ref } from '/core/index.js';
+import { reactive, ref } from '../../core/index.js';
 import { uid, loadTodos, saveTodos } from './utils.js';
 
 export const CATEGORIES = ['工作', '生活', '学习', '其他'];
