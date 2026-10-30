@@ -1,0 +1,80 @@
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: #ece9f1;
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI',
+    'PingFang SC', 'Microsoft YaHei', sans-serif;
+    color: #3d3a45;
+    padding: 24px;
+    -webkit-font-smoothing: antialiased;
+}
+
+#root { width: 100%; max-width: 380px; }
+
+#demo {
+    background: #f8f6fb;
+    border: 1px solid #ddd8e6;
+    border-radius: 20px;
+    padding: 52px 40px;
+    text-align: center;
+    box-shadow: 0 12px 32px -12px rgba(93, 82, 120, 0.18);
+}
+
+#demo p {
+    font-size: 12px;
+    font-weight: 500;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: #948ea6;
+    margin-bottom: 8px;
+}
+
+#demo p span {
+    display: block;
+    margin-top: 20px;
+    font-size: 80px;
+    font-weight: 600;
+    line-height: 1;
+    letter-spacing: -0.04em;
+    color: #6b5b95;
+    font-variant-numeric: tabular-nums;
+}
+
+#demo button {
+    width: 100%;
+    margin-top: 12px;
+    padding: 15px 24px;
+    border: none;
+    border-radius: 12px;
+    background: #8b7bb0;
+    color: #ffffff;
+    font-size: 14px;
+    font-weight: 600;
+    letter-spacing: 0.04em;
+    cursor: pointer;
+    transition: background 0.2s, transform 0.15s;
+}
+
+#demo button:hover {
+    background: #7a69a3;
+}
+
+#demo button:active {
+    transform: scale(0.98);
+}
+
+#demo::after {
+    content: 'reactive → effect → patch';
+    display: block;
+    margin-top: 32px;
+    padding-top: 20px;
+    border-top: 1px solid #e4dff0;
+    font-size: 11px;
+    letter-spacing: 0.06em;
+    color: #b0a9c2;
+    font-family: 'SF Mono', Menlo, Consolas, monospace;
+}
