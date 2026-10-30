@@ -1,4 +1,4 @@
-import { h, createApp } from '../packages/vue/index.js';
+import { h, createApp } from '/core/index.js';
 import { Header } from './components/Header.js';
 import { TodoInput } from './components/TodoInput.js';
 import { TodoFilters } from './components/TodoFilters.js';

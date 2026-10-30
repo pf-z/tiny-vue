@@ -1,4 +1,4 @@
-import { html } from '../../packages/vue/index.js';
+import { html } from '/core/index.js';
 import { visibleList } from '../store.js';
 import { TodoItem } from './TodoItem.js';
 

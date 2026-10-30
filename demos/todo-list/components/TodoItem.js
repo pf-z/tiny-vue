@@ -1,4 +1,4 @@
-import { html } from '../../packages/vue/index.js';
+import { html } from '/core/index.js';
 import {
   toggleTodo, removeTodo, startEdit, saveEdit, cancelEdit, editingId, editText
 } from '../store.js';
