@@ -1,4 +1,4 @@
-import { reactive, h, createApp } from '/core/index.js';
+import { reactive, h, createApp } from '../../core/index.js';
 
 // 1. State: A reactive object
 const state = reactive({ count: 0 });
