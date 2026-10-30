@@ -1,46 +1,51 @@
 import { activeEffect } from './effect.js';
 import { isObject } from './shared.js';
 
-// 缓存原始对象 → Proxy 的映射
-// 同一个原始对象多次调用 reactive() 时返回同一个 Proxy，避免重复创建和依赖丢失
+// Cache mapping from original object to Proxy.
+// When reactive() is called multiple times on the same original object,
+// return the same Proxy to avoid redundant creation and loss of dependencies.
 const proxyCache = new WeakMap();
 
 export function reactive(target) {
-  // 如果该原始对象已经创建过 Proxy，直接复用
+
+  // If the original object has already been proxied, reuse it directly.
   if (proxyCache.has(target)) return proxyCache.get(target);
 
-  // 每个原始对象对应一份依赖表
-  // 结构：Map<属性key, Set<effect wrapped 函数>>
+  // Each original object corresponds to a dependency table.
+  // Structure: Map<property key, Set<effect wrapped functions>>
   const depsMap = new Map();
 
   const proxy = new Proxy(target, {
-    // 读取属性时收集依赖
+
+    // Collect dependencies when reading attributes.
     get(target, key) {
-      // 只有在 effect 执行上下文中才收集依赖
-      // activeEffect 为 null 说明是普通读取（非响应式上下文），不收集
+
+      // Dependencies are only collected within the effect execution context.
+      // If activeEffect is null, it indicates a regular read (non-reactive context), so no collection occurs.
       if (activeEffect) {
         let deps = depsMap.get(key);
         if (!deps) {
-          // 该属性第一次被读取，初始化依赖集合
+          // Initialize the dependency set upon the first read of this property.
           deps = new Set();
           depsMap.set(key, deps);
         }
-        // 把当前 effect 加入该属性的依赖集合
+        // Add the current effect to the dependency set of this property.
         deps.add(activeEffect);
       }
 
       const value = target[key];
-      // 如果属性值是对象，递归包装成响应式，实现深层响应
+      // If the property value is an object, recursively wrap it to make it reactive, enabling deep reactivity.
       return isObject(value) ? reactive(value) : value;
     },
 
-    // 写入属性时触发依赖更新
+    // Trigger dependency update when writing properties.
     set(target, key, value) {
-      // 先写入原始对象
+
+      // Write the original object first.
       target[key] = value;
 
-      // 取出该属性收集的依赖集合，逐个执行
-      // 这里执行的是 effect 里的 wrapped 函数，会重新渲染组件
+      // Retrieve the set of dependencies collected by this attribute and execute them one by one.
+      // This executes the wrapped function inside effect, which will re-render the component.
       const deps = depsMap.get(key);
       if (deps) deps.forEach(fn => fn());
 
@@ -48,7 +53,7 @@ export function reactive(target) {
     }
   });
 
-  // 缓存 Proxy，下次同一原始对象直接返回
+  // Cache the proxy, and return the same original object directly next time.
   proxyCache.set(target, proxy);
   return proxy;
 }

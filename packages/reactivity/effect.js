@@ -1,55 +1,63 @@
-// 当前正在执行的副作用函数
-// reactive/ref 的 get 里通过读取它来判断是否处于 effect 执行上下文，从而收集依赖
-// 它是个全局单例，只在 wrapped() 执行期间有值，其余时间为 null
+// The currently executing side effect.
+// The getters in reactive/ref read this to decide whether they are inside
+// an effect execution context, and therefore whether to track dependencies.
+// It is a global singleton: set only while wrapped() is running, otherwise null.
 export let activeEffect = null;
 
-// 副作用函数执行栈
-// 用于处理 effect 嵌套：内层 effect 执行完后，activeEffect 要恢复成外层 effect，而不是直接置 null
+// Stack of executing side effects.
+// Used to handle nested effects: when an inner effect finishes, activeEffect
+// must be restored to the outer effect instead of being set to null.
 const effectStack = [];
 
-// 当前 effect 嵌套深度
+// Current nesting depth of effects.
 let effectDepth = 0;
-// 最大嵌套深度，防止 A 触发 B、B 又触发 A 的无限循环
+
+// Maximum nesting depth, used to stop infinite loops where effect A triggers
+// effect B and effect B triggers effect A again.
 const MAX_DEPTH = 100;
 
 export function effect(fn) {
-  // wrapped 是对用户传入 fn 的包装
-  // 依赖收集时收集的是 wrapped（而不是 fn），这样触发时调用 wrapped 能重新建立 activeEffect 上下文
+
+  // wrapped is a wrapper around the user-provided fn.
+  // Dependency tracking collects wrapped (not fn), so that when the effect is
+  // triggered, calling wrapped() re-establishes the activeEffect context.
   const wrapped = () => {
-    // 自递归保护：同一个 effect 已经在执行栈中，说明是它自己触发的自己
-    // 直接返回，避免无限递归
+
+    // Self-recursion guard: if this effect is already on the stack, it was
+    // triggered by itself. Return immediately to avoid infinite recursion.
     if (effectStack.includes(wrapped)) return;
 
-    // 嵌套深度保护：effect 之间互相触发形成闭环时，深度会持续增长
-    // 超过上限直接抛错，暴露依赖循环问题
+    // Depth guard: when effects trigger each other in a cycle, depth keeps
+    // growing. Throw once the limit is exceeded to expose the dependency cycle.
     if (effectDepth >= MAX_DEPTH) {
-      throw new Error('[reactivity] effect 循环触发超过最大深度，请检查依赖闭环');
+      throw new Error('[reactivity] effect triggered too deeply, check for dependency cycles');
     }
 
     try {
-      // 入栈并把 activeEffect 指向自己
-      // 这样 fn() 执行期间，所有 reactive/ref 的 get 都能收集到当前 wrapped
+      // Push onto the stack and point activeEffect at this effect.
+      // While fn() runs, every reactive/ref get() will collect this wrapped.
       effectStack.push(wrapped);
       activeEffect = wrapped;
       effectDepth++;
 
-      // 执行用户逻辑（例如组件 render）
+      // Run the user logic (e.g. component render).
       fn();
     } finally {
-      // 无论 fn 是否抛错，都要恢复现场
+
+      // Restore state whether fn() throws or not.
       effectDepth--;
       effectStack.pop();
 
-      // 关键：不能直接置 null
-      // 如果存在外层 effect，activeEffect 要恢复成外层 effect
-      // 否则外层 effect 后续的读取就无法收集依赖
+      // Important: do not set activeEffect to null directly.
+      // If an outer effect exists, activeEffect must be restored to it;
+      // otherwise subsequent reads in the outer effect would not be tracked.
       activeEffect = effectStack[effectStack.length - 1] || null;
     }
   };
 
-  // 首次执行，建立初始依赖收集
+  // First run: establishes the initial dependency tracking.
   wrapped();
 
-  // 返回 wrapped，便于外部手动触发或用于卸载
+  // Return wrapped so it can be triggered manually or used for unmounting.
   return wrapped;
 }
