@@ -1,0 +1,22 @@
+{
+  "name": "tiny-vue",
+  "version": "0.0.1",
+  "description": "The smallest Vue implementation and a todo-list example built with it.",
+  "type": "module",
+  "main": "packages/vue/index.js",
+  "exports": {
+    ".": "./packages/vue/index.js",
+    "./reactivity": "./packages/reactivity/index.js",
+    "./runtime-dom": "./packages/runtime-dom/index.js"
+  },
+  "files": [
+    "packages"
+  ],
+  "keywords": [
+    "vue",
+    "mini-vue",
+    "reactivity",
+    "virtual-dom"
+  ],
+  "license": "MIT"
+}
