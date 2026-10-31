@@ -1,4 +1,4 @@
-import { html } from '/core/index.js';
+import { html } from '../../../core/index.js';
 import { store, clearDone, clearAll } from '../store.js';
 
 export function Footer() {
